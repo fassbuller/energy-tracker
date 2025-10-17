@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUDHD Energie Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        [data-theme="nature"] {
+            --primary-color: #16a34a;
+            --secondary-color: #65a30d;
+            --bg-color: #f0fdf4;
+            --card-bg: #ffffff;
+        }
+
+        [data-theme="ocean"] {
+            --primary-color: #0891b2;
+            --secondary-color: #06b6d4;
+            --bg-color: #ecfeff;
+            --card-bg: #ffffff;
+        }
+
+        [data-theme="sunset"] {
+            --primary-color: #f97316;
+            --secondary-color: #ea580c;
+            --bg-color: #fff7ed;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .energy-display {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .energy-value {
+            font-size: 5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 20px 0;
+        }
+
+        .energy-bar {
+            width: 100%;
+            height: 40px;
+            background: var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .energy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+            transition: all 0.5s ease;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .energy-fill.low {
+            background: linear-gradient(90deg, var(--danger-color), var(--warning-color));
+        }
+
+        .energy-fill.medium {
+            background: linear-gradient(90deg, var(--warning-color), var(--primary-color));
+        }
+
+        .energy-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            to {
+                left: 100%;
+            }
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 16px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button-secondary {
+            background: var(--text-secondary);
+        }
+
+        .activity-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .activity-item:hover {
+            border-color: var(--primary-color);
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .activity-time {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+        }
+
+        .activity-energy {
+            font-size: 1.5em;
+            font-weight: bold;
+            padding: 5px 15px;
+            border-radius: 8px;
+        }
+
+        .activity-energy.positive {
+            color: var(--success-color);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .activity-energy.negative {
+            color: var(--danger-color);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .quick-button {
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .quick-button:hover {
+            border-color: var(--primary-color);
+            background: var(--card-bg);
+            transform: translateY(-2px);
+        }
+
+        .quick-button.recharging {
+            border-color: var(--success-color);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .quick-button.recharging:hover {
+            border-color: var(--success-color);
+            background: rgba(16, 185, 129, 0.1);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .quick-button.draining {
+            opacity: 0.5;
+        }
+
+        .low-energy-mode {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(245, 158, 11, 0.1));
+            border: 2px solid var(--warning-color);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .low-energy-mode h3 {
+            color: var(--warning-color);
+            margin-bottom: 10px;
+        }
+
+        .quick-button-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .quick-button-energy {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        .streak-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--warning-color), #f59e0b);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .settings-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .theme-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .theme-option {
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .theme-option:hover, .theme-option.active {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .nav-tab:hover {
+            border-color: var(--primary-color);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: transparent;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .chart-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--bg-color);
+            border-radius: 10px;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-label {
+            width: 120px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .chart-bar-container {
+            flex: 1;
+            height: 30px;
+            background: var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+
+        .chart-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .chart-value {
+            width: 60px;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .delete-button {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .delete-button:hover {
+            opacity: 0.8;
+        }
+
+        #quick-actions-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .energy-value {
+                font-size: 3.5em;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="container">
+        <div class="header">
+            <h1>⚡ AUDHD Energie Tracker</h1>
+            <p>Manage deine Energie wie ein Profi</p>
+        </div>
+
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('tracker')">🎯 Tracker</div>
+            <div class="nav-tab" onclick="switchTab('stats')">📊 Statistiken</div>
+            <div class="nav-tab" onclick="switchTab('settings')">⚙️ Einstellungen</div>
+        </div>
+
+        <!-- Tracker Tab -->
+        <div id="tracker-tab" class="tab-content active">
+            <div class="card">
+                <h2>🔋 Aktuelles Energielevel</h2>
+                <div class="energy-display">
+                    <div id="energy-status"></div>
+                    <div class="energy-value" id="energy-value">100</div>
+                    <div class="energy-bar">
+                        <div class="energy-fill" id="energy-fill" style="width: 100%"></div>
+                    </div>
+                    <div>von <span id="max-energy">100</span> Energie</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>⚡ Quick Actions</h2>
+                <div id="quick-actions-empty" style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                    <p style="margin-bottom: 15px;">📝 Noch keine Quick Actions vorhanden</p>
+                    <p style="font-size: 0.9em;">Gehe zu Einstellungen → Aktivitäten verwalten, um deine häufigsten Aktivitäten als Shortcuts zu speichern!</p>
+                </div>
+                <div class="quick-actions" id="quick-actions"></div>
+            </div>
+
+            <div class="card">
+                <h2>📝 Heutige Aktivitäten</h2>
+                <div class="activity-list" id="activity-list">
+                    <p style="text-align: center; color: var(--text-secondary);">Noch keine Aktivitäten heute</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div id="stats-tab" class="tab-content">
+            <div class="card">
+                <h2>🏆 Deine Statistiken</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-streak">0</div>
+                        <div class="stat-label">Tage Streak 🔥</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-total-days">0</div>
+                        <div class="stat-label">Tage genutzt</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-activities">0</div>
+                        <div class="stat-label">Aktivitäten</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-avg-energy">100</div>
+                        <div class="stat-label">Ø Energie</div>
+                    </div>
+                </div>
+                <div id="streak-reward"></div>
+            </div>
+
+            <div class="card">
+                <h2>📈 Letzte 7 Tage</h2>
+                <div class="chart-container" id="week-chart"></div>
+            </div>
+
+            <div class="card">
+                <h2>📊 Aktivitäten nach Kategorie</h2>
+                <div class="chart-container" id="category-chart"></div>
+            </div>
+
+            <div class="card">
+                <h2>⏰ Durchschnitt pro Tageszeit</h2>
+                <div class="chart-container" id="time-chart"></div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <div class="card">
+                <h2>📝 Aktivitäten verwalten</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">Erstelle hier deine Quick Actions für schnelles Tracking im Hauptmenü</p>
+                <div class="input-group">
+                    <label>Aktivität</label>
+                    <input type="text" id="activity-name" placeholder="z.B. Aufräumen, Zocken, Pause...">
+                </div>
+                <div class="input-group">
+                    <label>Energie-Veränderung</label>
+                    <input type="number" id="activity-energy" placeholder="-10 (verbraucht) oder +10 (regeneriert)">
+                </div>
+                <div class="input-group">
+                    <label>Kategorie (optional)</label>
+                    <select id="activity-category">
+                        <option value="">Keine Kategorie</option>
+                        <option value="work">💼 Arbeit</option>
+                        <option value="social">👥 Sozial</option>
+                        <option value="selfcare">🧘 Self-Care</option>
+                        <option value="hobby">🎨 Hobby</option>
+                        <option value="chores">🏠 Haushalt</option>
+                        <option value="rest">😴 Ruhe</option>
+                    </select>
+                </div>
+                <button class="button" onclick="saveAsQuick()">Als Quick-Action speichern</button>
+                
+                <div style="margin-top: 30px;" id="saved-quick-actions">
+                    <h3 style="margin-bottom: 15px;">Gespeicherte Quick Actions:</h3>
+                    <div id="quick-actions-list"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🎨 Design anpassen</h2>
+                <div class="settings-grid">
+                    <div>
+                        <label>Farbschema</label>
+                        <div class="theme-selector">
+                            <div class="theme-option active" onclick="setTheme('light')">☀️ Hell</div>
+                            <div class="theme-option" onclick="setTheme('dark')">🌙 Dunkel</div>
+                            <div class="theme-option" onclick="setTheme('nature')">🌿 Natur</div>
+                            <div class="theme-option" onclick="setTheme('ocean')">🌊 Ozean</div>
+                            <div class="theme-option" onclick="setTheme('sunset')">🌅 Sunset</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>⚙️ Einstellungen</h2>
+                <div class="input-group">
+                    <label>Tages-Startenergie</label>
+                    <input type="number" id="start-energy" value="100" min="0" max="200">
+                    <button class="button" onclick="setStartEnergy()">Für heute übernehmen</button>
+                </div>
+                <div class="input-group">
+                    <label>⚠️ Low Energy Schwellenwert</label>
+                    <input type="number" id="low-energy-threshold" value="30" min="0" max="100">
+                    <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: 5px;">
+                        Ab diesem Level werden nur noch regenerative Aktivitäten priorisiert angezeigt
+                    </p>
+                </div>
+                <div class="input-group">
+                    <label>Erinnerung aktivieren</label>
+                    <select id="reminder-setting">
+                        <option value="off">Keine Erinnerung</option>
+                        <option value="2">Alle 2 Stunden</option>
+                        <option value="4">Alle 4 Stunden</option>
+                        <option value="6">Alle 6 Stunden</option>
+                    </select>
+                    <button class="button" onclick="saveSettings()">Speichern</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📤 Daten verwalten</h2>
+                <button class="button" onclick="exportData()">Daten exportieren</button>
+                <button class="button button-secondary" onclick="resetDay()">Tag zurücksetzen</button>
+                <button class="button" style="background: var(--danger-color);" onclick="confirmResetAll()">Alle Daten löschen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reward Modal -->
+    <div id="reward-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="text-align: center; margin-bottom: 20px;">🎉 Glückwunsch!</h2>
+            <p style="text-align: center; font-size: 1.2em;" id="reward-message"></p>
+            <button class="button" onclick="closeRewardModal()">Awesome!</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize app
+        let currentEnergy = 100;
+        let maxEnergy = 100;
+        let activities = [];
+        let quickActions = [];
+        let lowEnergyThreshold = 30;
+        let stats = {
+            lastUsed: null,
+            streak: 0,
+            totalDays: 0,
+            allActivities: []
+        };
+
+        // Load data on start
+        loadData();
+        updateDisplay();
+        checkStreak();
+        checkReminders();
+
+        function loadData() {
+            const savedData = localStorage.getItem('audhd-energy-tracker');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                currentEnergy = data.currentEnergy || 100;
+                maxEnergy = data.maxEnergy || 100;
+                activities = data.activities || [];
+                quickActions = data.quickActions || [];
+                lowEnergyThreshold = data.lowEnergyThreshold || 30;
+                stats = data.stats || { lastUsed: null, streak: 0, totalDays: 0, allActivities: [] };
+                
+                // Check if it's a new day
+                if (isNewDay()) {
+                    resetForNewDay();
+                }
+            }
+            
+            // Load settings
+            const theme = localStorage.getItem('theme') || 'light';
+            setTheme(theme);
+            
+            const startEnergyInput = document.getElementById('start-energy');
+            if (startEnergyInput) {
+                startEnergyInput.value = maxEnergy;
+            }
+            
+            const thresholdInput = document.getElementById('low-energy-threshold');
+            if (thresholdInput) {
+                thresholdInput.value = lowEnergyThreshold;
+            }
+        }
+
+        function saveData() {
+            const data = {
+                currentEnergy,
+                maxEnergy,
+                activities,
+                quickActions,
+                lowEnergyThreshold,
+                stats,
+                lastSaved: new Date().toISOString()
+            };
+            localStorage.setItem('audhd-energy-tracker', JSON.stringify(data));
+        }
+
+        function isNewDay() {
+            if (!stats.lastUsed) return false;
+            const lastDate = new Date(stats.lastUsed).toDateString();
+            const today = new Date().toDateString();
+            return lastDate !== today;
+        }
+
+        function resetForNewDay() {
+            // Save yesterday's data to history
+            if (activities.length > 0) {
+                const yesterday = {
+                    date: new Date(stats.lastUsed).toDateString(),
+                    activities: [...activities],
+                    finalEnergy: currentEnergy
+                };
+                stats.allActivities.push(yesterday);
+            }
+            
+            // Reset for new day
+            currentEnergy = maxEnergy;
+            activities = [];
+            stats.totalDays++;
+            saveData();
+        }
+
+        function checkStreak() {
+            const today = new Date();
+            const lastUsed = stats.lastUsed ? new Date(stats.lastUsed) : null;
+            
+            if (!lastUsed) {
+                // First time using
+                stats.streak = 1;
+                stats.lastUsed = today.toISOString();
+            } else {
+                const daysDiff = Math.floor((today - lastUsed) / (1000 * 60 * 60 * 24));
+                
+                if (daysDiff === 1) {
+                    // Consecutive day
+                    stats.streak++;
+                    checkStreakReward();
+                } else if (daysDiff > 1) {
+                    // Streak broken
+                    stats.streak = 1;
+                }
+                
+                stats.lastUsed = today.toISOString();
+            }
+            
+            saveData();
+        }
+
+        function checkStreakReward() {
+            const rewards = {
+                7: "Du hast 7 Tage durchgehalten! 🎯 Das ist der Anfang einer Gewohnheit!",
+                14: "2 Wochen Streak! 🔥 Du bist auf dem richtigen Weg!",
+                30: "30 Tage! 🏆 Du bist ein Energie-Management-Meister!",
+                50: "50 Tage! 💎 Unglaublich! Du kennst dich selbst jetzt richtig gut!",
+                100: "100 TAGE! 👑 Du bist eine absolute Legende!"
+            };
+            
+            if (rewards[stats.streak]) {
+                showRewardModal(rewards[stats.streak]);
+            }
+        }
+
+        function showRewardModal(message) {
+            document.getElementById('reward-message').textContent = message;
+            document.getElementById('reward-modal').classList.add('show');
+        }
+
+        function closeRewardModal() {
+            document.getElementById('reward-modal').classList.remove('show');
+        }
+
+        function deleteActivity(id) {
+            const activity = activities.find(a => a.id === id);
+            if (activity) {
+                currentEnergy = Math.max(0, Math.min(maxEnergy, currentEnergy - activity.energy));
+                activities = activities.filter(a => a.id !== id);
+                updateDisplay();
+                saveData();
+            }
+        }
+
+        function saveAsQuick() {
+            const name = document.getElementById('activity-name').value.trim();
+            const energy = parseInt(document.getElementById('activity-energy').value);
+            const category = document.getElementById('activity-category').value;
+            
+            if (!name || isNaN(energy)) {
+                alert('Bitte Aktivität und Energiewert eingeben!');
+                return;
+            }
+            
+            quickActions.push({ name, energy, category });
+            
+            // Clear inputs
+            document.getElementById('activity-name').value = '';
+            document.getElementById('activity-energy').value = '';
+            document.getElementById('activity-category').value = '';
+            
+            updateQuickActions();
+            saveData();
+            
+            alert('✅ Quick Action gespeichert! Du findest sie jetzt im Tracker-Menü.');
+        }
+
+        function addQuickActivity(index) {
+            const quick = quickActions[index];
+            
+            const activity = {
+                id: Date.now(),
+                name: quick.name,
+                energy: quick.energy,
+                category: quick.category || '',
+                time: new Date().toISOString()
+            };
+            
+            activities.unshift(activity);
+            currentEnergy = Math.max(0, Math.min(maxEnergy, currentEnergy + quick.energy));
+            
+            updateDisplay();
+            saveData();
+            showEnergyWarning();
+        }
+
+        function deleteQuickAction(index) {
+            quickActions.splice(index, 1);
+            updateQuickActions();
+            saveData();
+        }
+
+        function updateDisplay() {
+            // Update energy display
+            const energyValue = document.getElementById('energy-value');
+            const energyFill = document.getElementById('energy-fill');
+            const maxEnergyDisplay = document.getElementById('max-energy');
+            
+            energyValue.textContent = currentEnergy;
+            maxEnergyDisplay.textContent = maxEnergy;
+            
+            const percentage = (currentEnergy / maxEnergy) * 100;
+            energyFill.style.width = percentage + '%';
+            
+            // Update fill color based on energy level
+            energyFill.className = 'energy-fill';
+            if (percentage < 30) {
+                energyFill.classList.add('low');
+            } else if (percentage < 60) {
+                energyFill.classList.add('medium');
+            }
+            
+            // Update activity list
+            updateActivityList();
+            updateQuickActions();
+            updateStats();
+        }
+
+        function updateActivityList() {
+            const list = document.getElementById('activity-list');
+            
+            if (activities.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Noch keine Aktivitäten heute</p>';
+                return;
+            }
+            
+            list.innerHTML = activities.map(activity => {
+                const time = new Date(activity.time).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                const energyClass = activity.energy >= 0 ? 'positive' : 'negative';
+                const categoryEmoji = {
+                    work: '💼',
+                    social: '👥',
+                    selfcare: '🧘',
+                    hobby: '🎨',
+                    chores: '🏠',
+                    rest: '😴'
+                };
+                
+                return `
+                    <div class="activity-item">
+                        <div class="activity-info">
+                            <div class="activity-name">
+                                ${categoryEmoji[activity.category] || '📌'} ${activity.name}
+                            </div>
+                            <div class="activity-time">${time}</div>
+                        </div>
+                        <div class="activity-energy ${energyClass}">
+                            ${activity.energy >= 0 ? '+' : ''}${activity.energy}
+                        </div>
+                        <button class="delete-button" onclick="deleteActivity(${activity.id})">🗑️</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateQuickActions() {
+            const container = document.getElementById('quick-actions');
+            const emptyState = document.getElementById('quick-actions-empty');
+            const settingsList = document.getElementById('quick-actions-list');
+            
+            const isLowEnergy = currentEnergy <= lowEnergyThreshold;
+            
+            // Update tracker buttons
+            if (quickActions.length === 0) {
+                emptyState.style.display = 'block';
+                container.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                container.style.display = 'grid';
+                
+                // Sort: recharging activities first in low energy mode
+                let sortedActions = [...quickActions];
+                if (isLowEnergy) {
+                    sortedActions.sort((a, b) => {
+                        // Positive energy (recharging) activities come first
+                        if (a.energy > 0 && b.energy <= 0) return -1;
+                        if (a.energy <= 0 && b.energy > 0) return 1;
+                        // Then sort by energy value (highest recharge first)
+                        return b.energy - a.energy;
+                    });
+                }
+                
+                container.innerHTML = sortedActions.map((quick, index) => {
+                    const originalIndex = quickActions.indexOf(quick);
+                    const isRecharging = quick.energy > 0;
+                    const isDraining = quick.energy < 0;
+                    
+                    let classes = 'quick-button';
+                    if (isLowEnergy) {
+                        if (isRecharging) {
+                            classes += ' recharging';
+                        } else if (isDraining) {
+                            classes += ' draining';
+                        }
+                    }
+                    
+                    return `
+                        <div class="${classes}" onclick="addQuickActivity(${originalIndex})">
+                            <div class="quick-button-name">${quick.name}</div>
+                            <div class="quick-button-energy" style="color: ${quick.energy >= 0 ? 'var(--success-color)' : 'var(--danger-color)'}">
+                                ${quick.energy >= 0 ? '+' : ''}${quick.energy}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // Update settings list
+            if (settingsList) {
+                if (quickActions.length === 0) {
+                    settingsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">Noch keine Quick Actions gespeichert</p>';
+                } else {
+                    settingsList.innerHTML = quickActions.map((quick, index) => {
+                        const categoryEmoji = {
+                            work: '💼',
+                            social: '👥',
+                            selfcare: '🧘',
+                            hobby: '🎨',
+                            chores: '🏠',
+                            rest: '😴'
+                        };
+                        return `
+                            <div class="activity-item">
+                                <div class="activity-info">
+                                    <div class="activity-name">
+                                        ${categoryEmoji[quick.category] || '📌'} ${quick.name}
+                                    </div>
+                                </div>
+                                <div class="activity-energy ${quick.energy >= 0 ? 'positive' : 'negative'}">
+                                    ${quick.energy >= 0 ? '+' : ''}${quick.energy}
+                                </div>
+                                <button class="delete-button" onclick="deleteQuickAction(${index})">🗑️</button>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-streak').textContent = stats.streak;
+            document.getElementById('stat-total-days').textContent = stats.totalDays;
+            document.getElementById('stat-activities').textContent = activities.length;
+            
+            if (activities.length > 0) {
+                const avgEnergy = Math.round(activities.reduce((sum, a) => sum + a.energy, 0) / activities.length);
+                document.getElementById('stat-avg-energy').textContent = avgEnergy >= 0 ? '+' + avgEnergy : avgEnergy;
+            }
+            
+            // Show streak badge
+            const rewardContainer = document.getElementById('streak-reward');
+            if (stats.streak >= 3) {
+                rewardContainer.innerHTML = `<div class="streak-badge">🔥 ${stats.streak} Tage Streak!</div>`;
+            }
+            
+            updateWeekChart();
+            updateCategoryChart();
+            updateTimeChart();
+        }
+
+        function updateWeekChart() {
+            const chart = document.getElementById('week-chart');
+            const last7Days = [];
+            const today = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toDateString();
+                
+                const dayData = stats.allActivities.find(d => d.date === dateStr) || (i === 0 ? { activities, finalEnergy: currentEnergy } : null);
+                
+                last7Days.push({
+                    label: i === 0 ? 'Heute' : date.toLocaleDateString('de-DE', { weekday: 'short' }),
+                    energy: dayData ? dayData.finalEnergy : null,
+                    activities: dayData ? dayData.activities.length : 0
+                });
+            }
+            
+            chart.innerHTML = last7Days.map(day => {
+                if (day.energy === null) {
+                    return `
+                        <div class="chart-bar">
+                            <div class="chart-label">${day.label}</div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill" style="width: 0%; opacity: 0.3;"></div>
+                            </div>
+                            <div class="chart-value">-</div>
+                        </div>
+                    `;
+                }
+                
+                const percentage = (day.energy / maxEnergy) * 100;
+                return `
+                    <div class="chart-bar">
+                        <div class="chart-label">${day.label}</div>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-fill" style="width: ${percentage}%;"></div>
+                        </div>
+                        <div class="chart-value">${day.energy}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCategoryChart() {
+            const chart = document.getElementById('category-chart');
+            const categories = {};
+            
+            activities.forEach(activity => {
+                const cat = activity.category || 'other';
+                categories[cat] = (categories[cat] || 0) + 1;
+            });
+            
+            const categoryLabels = {
+                work: '💼 Arbeit',
+                social: '👥 Sozial',
+                selfcare: '🧘 Self-Care',
+                hobby: '🎨 Hobby',
+                chores: '🏠 Haushalt',
+                rest: '😴 Ruhe',
+                other: '📌 Sonstiges'
+            };
+            
+            const total = activities.length || 1;
+            
+            chart.innerHTML = Object.entries(categories).map(([cat, count]) => {
+                const percentage = (count / total) * 100;
+                return `
+                    <div class="chart-bar">
+                        <div class="chart-label">${categoryLabels[cat]}</div>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-fill" style="width: ${percentage}%;"></div>
+                        </div>
+                        <div class="chart-value">${count}</div>
+                    </div>
+                `;
+            }).join('') || '<p style="text-align: center; color: var(--text-secondary);">Noch keine Daten</p>';
+        }
+
+        function updateTimeChart() {
+            const chart = document.getElementById('time-chart');
+            const timeSlots = {
+                'Morgen (6-12)': { total: 0, count: 0 },
+                'Mittag (12-18)': { total: 0, count: 0 },
+                'Abend (18-24)': { total: 0, count: 0 },
+                'Nacht (0-6)': { total: 0, count: 0 }
+            };
+            
+            activities.forEach(activity => {
+                const hour = new Date(activity.time).getHours();
+                let slot;
+                if (hour >= 6 && hour < 12) slot = 'Morgen (6-12)';
+                else if (hour >= 12 && hour < 18) slot = 'Mittag (12-18)';
+                else if (hour >= 18 && hour < 24) slot = 'Abend (18-24)';
+                else slot = 'Nacht (0-6)';
+                
+                timeSlots[slot].total += activity.energy;
+                timeSlots[slot].count++;
+            });
+            
+            chart.innerHTML = Object.entries(timeSlots).map(([slot, data]) => {
+                const avg = data.count > 0 ? Math.round(data.total / data.count) : 0;
+                const maxAvg = 50; // for visualization
+                const percentage = Math.abs(avg) / maxAvg * 100;
+                
+                return `
+                    <div class="chart-bar">
+                        <div class="chart-label">${slot}</div>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-fill" style="width: ${Math.min(percentage, 100)}%;"></div>
+                        </div>
+                        <div class="chart-value">${avg >= 0 ? '+' : ''}${avg}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showEnergyWarning() {
+            const statusDiv = document.getElementById('energy-status');
+            const percentage = (currentEnergy / maxEnergy) * 100;
+            const isLowEnergy = currentEnergy <= lowEnergyThreshold;
+            
+            if (isLowEnergy) {
+                const rechargingCount = quickActions.filter(q => q.energy > 0).length;
+                statusDiv.innerHTML = `
+                    <div class="low-energy-mode">
+                        <h3>🔋 Low Energy Modus</h3>
+                        <p>Deine Energie ist unter ${lowEnergyThreshold}. Zeit für Self-Care!</p>
+                        ${rechargingCount > 0 ? `<p style="margin-top: 10px; font-size: 0.95em;">✨ Regenerative Aktivitäten werden jetzt zuerst angezeigt</p>` : ''}
+                    </div>
+                `;
+            } else if (percentage > 90) {
+                statusDiv.innerHTML = '<div class="alert alert-success">✨ Du bist voller Energie! Nutze sie weise!</div>';
+            } else {
+                statusDiv.innerHTML = '';
+            }
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            if (tabName === 'stats') {
+                updateStats();
+            }
+        }
+
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function setStartEnergy() {
+            const newMax = parseInt(document.getElementById('start-energy').value);
+            if (newMax > 0 && newMax <= 200) {
+                maxEnergy = newMax;
+                currentEnergy = newMax;
+                updateDisplay();
+                saveData();
+                alert('✅ Startenergie aktualisiert!');
+            }
+        }
+
+        function saveSettings() {
+            const reminder = document.getElementById('reminder-setting').value;
+            const threshold = parseInt(document.getElementById('low-energy-threshold').value);
+            
+            if (threshold >= 0 && threshold <= 100) {
+                lowEnergyThreshold = threshold;
+            }
+            
+            localStorage.setItem('reminder', reminder);
+            saveData();
+            updateDisplay();
+            alert('✅ Einstellungen gespeichert!');
+            setupReminders();
+        }
+
+        function checkReminders() {
+            const reminder = localStorage.getItem('reminder');
+            if (reminder && reminder !== 'off') {
+                setupReminders();
+            }
+        }
+
+        function setupReminders() {
+            const reminder = localStorage.getItem('reminder');
+            if (reminder && reminder !== 'off') {
+                const hours = parseInt(reminder);
+                const interval = hours * 60 * 60 * 1000;
+                
+                setInterval(() => {
+                    if (document.hidden) {
+                        // Only remind if tab is not active
+                        new Notification('⚡ AUDHD Energie Tracker', {
+                            body: 'Zeit, deine Energie zu tracken!',
+                            icon: '⚡'
+                        });
+                    }
+                }, interval);
+                
+                // Request notification permission
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission();
+                }
+            }
+        }
+
+        function exportData() {
+            const data = {
+                currentEnergy,
+                maxEnergy,
+                activities,
+                quickActions,
+                stats,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `audhd-tracker-export-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function resetDay() {
+            if (confirm('Möchtest du wirklich den heutigen Tag zurücksetzen?')) {
+                activities = [];
+                currentEnergy = maxEnergy;
+                updateDisplay();
+                saveData();
+                alert('✅ Tag zurückgesetzt!');
+            }
+        }
+
+        function confirmResetAll() {
+            if (confirm('⚠️ ACHTUNG: Dies löscht ALLE deine Daten unwiderruflich. Bist du sicher?')) {
+                if (confirm('Wirklich ALLE Daten löschen? Dies kann nicht rückgängig gemacht werden!')) {
+                    localStorage.removeItem('audhd-energy-tracker');
+                    location.reload();
+                }
+            }
+        }
+
+        // Initialize
+        showEnergyWarning();
+    </script>
+</body>
+</html>
