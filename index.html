@@ -2,13 +2,16 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>AUDHD Energie Tracker</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         :root {
@@ -22,6 +25,7 @@
             --text-color: #1e293b;
             --text-secondary: #64748b;
             --border-color: #e2e8f0;
+            --bottom-nav-height: 70px;
         }
 
         [data-theme="dark"] {
@@ -59,78 +63,111 @@
             color: var(--text-color);
             line-height: 1.6;
             transition: all 0.3s ease;
+            padding-bottom: var(--bottom-nav-height);
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 10px;
+            padding-bottom: 20px;
         }
 
         .header {
             text-align: center;
-            padding: 30px 0;
+            padding: 15px 10px 10px 10px;
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 1.5em;
+            margin-bottom: 5px;
         }
 
         .header p {
             opacity: 0.9;
+            font-size: 0.85em;
+        }
+
+        .sticky-energy {
+            margin-top: 10px;
+            padding: 8px 0;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .sticky-energy-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .sticky-energy-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        .sticky-energy-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 5px;
         }
 
         .card {
             background: var(--card-bg);
             border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             border: 1px solid var(--border-color);
             transition: transform 0.2s;
         }
 
         .card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
 
         .card h2 {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: var(--primary-color);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            font-size: 1.3em;
         }
 
         .energy-display {
             text-align: center;
-            padding: 40px 20px;
+            padding: 20px 10px;
         }
 
         .energy-value {
-            font-size: 5em;
+            font-size: 3.5em;
             font-weight: bold;
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin: 20px 0;
+            margin: 10px 0;
         }
 
         .energy-bar {
             width: 100%;
-            height: 40px;
+            height: 35px;
             background: var(--border-color);
             border-radius: 20px;
             overflow: hidden;
             position: relative;
-            margin: 20px 0;
+            margin: 15px 0;
         }
 
         .energy-fill {
@@ -180,13 +217,14 @@
 
         input, select, textarea {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border: 2px solid var(--border-color);
             border-radius: 10px;
             font-size: 16px;
             background: var(--bg-color);
             color: var(--text-color);
             transition: all 0.3s;
+            min-height: 48px;
         }
 
         input:focus, select:focus, textarea:focus {
@@ -199,7 +237,7 @@
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             border: none;
-            padding: 14px 28px;
+            padding: 16px 28px;
             border-radius: 10px;
             cursor: pointer;
             font-size: 16px;
@@ -207,6 +245,8 @@
             transition: all 0.3s;
             width: 100%;
             margin-top: 10px;
+            min-height: 50px;
+            touch-action: manipulation;
         }
 
         .button:hover {
@@ -215,7 +255,7 @@
         }
 
         .button:active {
-            transform: translateY(0);
+            transform: translateY(0) scale(0.98);
         }
 
         .button-secondary {
@@ -231,12 +271,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
             margin-bottom: 10px;
             background: var(--bg-color);
             border: 1px solid var(--border-color);
             transition: all 0.2s;
+            min-height: 60px;
         }
 
         .activity-item:hover {
@@ -276,19 +317,30 @@
 
         .quick-actions {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
         }
 
         .quick-button {
-            padding: 20px;
-            border-radius: 10px;
+            padding: 20px 12px;
+            border-radius: 12px;
             border: 2px solid var(--border-color);
             background: var(--bg-color);
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .quick-button:active {
+            transform: scale(0.97);
         }
 
         .quick-button:hover {
@@ -400,10 +452,50 @@
         }
 
         .nav-tabs {
+            display: none; /* Hide on mobile, use bottom nav instead */
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 8px 0;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .bottom-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-secondary);
+            font-size: 0.75em;
+            font-weight: 600;
+            min-height: 56px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .bottom-nav-item .nav-icon {
+            font-size: 1.8em;
+            margin-bottom: 3px;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .bottom-nav-item:active {
+            transform: scale(0.95);
         }
 
         .nav-tab {
@@ -537,11 +629,18 @@
             background: var(--danger-color);
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
+            padding: 10px 18px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             margin-left: 10px;
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
+        }
+
+        .delete-button:active {
+            transform: scale(0.95);
         }
 
         .delete-button:hover {
@@ -555,15 +654,28 @@
 
         @media (max-width: 600px) {
             .header h1 {
-                font-size: 1.8em;
+                font-size: 1.4em;
+            }
+            
+            .header p {
+                font-size: 0.8em;
             }
             
             .energy-value {
-                font-size: 3.5em;
+                font-size: 3em;
             }
 
             .quick-actions {
                 grid-template-columns: 1fr 1fr;
+            }
+            
+            .card {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+            
+            .card h2 {
+                font-size: 1.2em;
             }
         }
     </style>
@@ -573,12 +685,12 @@
         <div class="header">
             <h1>⚡ AUDHD Energie Tracker</h1>
             <p>Manage deine Energie wie ein Profi</p>
-        </div>
-
-        <div class="nav-tabs">
-            <div class="nav-tab active" onclick="switchTab('tracker')">🎯 Tracker</div>
-            <div class="nav-tab" onclick="switchTab('stats')">📊 Statistiken</div>
-            <div class="nav-tab" onclick="switchTab('settings')">⚙️ Einstellungen</div>
+            <div class="sticky-energy">
+                <div class="sticky-energy-value"><span id="sticky-energy-value">100</span> / <span id="sticky-max-energy">100</span></div>
+                <div class="sticky-energy-bar">
+                    <div class="sticky-energy-fill" id="sticky-energy-fill" style="width: 100%"></div>
+                </div>
+            </div>
         </div>
 
         <!-- Tracker Tab -->
@@ -734,6 +846,22 @@
                 <button class="button button-secondary" onclick="resetDay()">Tag zurücksetzen</button>
                 <button class="button" style="background: var(--danger-color);" onclick="confirmResetAll()">Alle Daten löschen</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="bottom-nav-item active" onclick="switchTab('tracker')">
+            <div class="nav-icon">🎯</div>
+            <div>Tracker</div>
+        </div>
+        <div class="bottom-nav-item" onclick="switchTab('stats')">
+            <div class="nav-icon">📊</div>
+            <div>Stats</div>
+        </div>
+        <div class="bottom-nav-item" onclick="switchTab('settings')">
+            <div class="nav-icon">⚙️</div>
+            <div>Settings</div>
         </div>
     </div>
 
@@ -949,11 +1077,19 @@
             const energyFill = document.getElementById('energy-fill');
             const maxEnergyDisplay = document.getElementById('max-energy');
             
+            // Update sticky energy bar
+            const stickyEnergyValue = document.getElementById('sticky-energy-value');
+            const stickyEnergyFill = document.getElementById('sticky-energy-fill');
+            const stickyMaxEnergy = document.getElementById('sticky-max-energy');
+            
             energyValue.textContent = currentEnergy;
             maxEnergyDisplay.textContent = maxEnergy;
+            stickyEnergyValue.textContent = currentEnergy;
+            stickyMaxEnergy.textContent = maxEnergy;
             
             const percentage = (currentEnergy / maxEnergy) * 100;
             energyFill.style.width = percentage + '%';
+            stickyEnergyFill.style.width = percentage + '%';
             
             // Update fill color based on energy level
             energyFill.className = 'energy-fill';
@@ -1251,17 +1387,20 @@
         }
 
         function switchTab(tabName) {
-            // Update tab buttons
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.classList.remove('active');
+            // Update bottom nav items
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.classList.remove('active');
             });
-            event.target.classList.add('active');
+            event.target.closest('.bottom-nav-item').classList.add('active');
             
             // Update tab content
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Scroll to top on tab switch
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             
             if (tabName === 'stats') {
                 updateStats();
